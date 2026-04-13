@@ -6,43 +6,38 @@ The Medallion Architecture is a data engineering standard that organizes data in
 
 ```mermaid
 graph LR
-    A["Data Sources<br/>(APIs, Databases, Files)"] --> B["Bronze Layer<br/>(Raw Data)"]
-    B --> C["Silver Layer<br/>(Normalized)"]
-    C --> D["Gold Layer<br/>(Business Ready)"]
-    D --> E["Analytics/BI<br/>(Reports, Dashboards)"]
-    style B fill:#D4A574,stroke:#333,stroke-width:2px,color:#000
-    style C fill:#C0C0C0,stroke:#333,stroke-width:2px,color:#000
-    style D fill:#FFD700,stroke:#333,stroke-width:2px,color:#000
-```
-
-## Example:
-
-```mermaid
-graph LR
-    SRC["Fund Admin API<br/>"]
-    
-    SRC --> ING["Staging<br/>"]
-    ING --> B["BRONZE<br/>fund_info<br/>investor_info<br/>commitments<br/>capital_activities<br/>rollforward"]
-    
-    B --> CLEAN["Validation<br/>Reconciliation<br/>Deduplication<br/>Normalization"]
-    CLEAN --> S["SILVER<br/>fund<br/>investor<br/>commitment<br/>capital_activity<br/>rollforward<br/>fund_category"]
-    
-    S --> AGG["Calculations<br/>Transformations<br/>Business Rules<br/>Joins<br/>Star Schema"]
-    AGG --> G["GOLD<br/>fund_metrics<br/>investor_portfolio<br/>fund_performance<br/>allocation_summary"]
-    
-    G --> USE["Usage<br/>(Reporting, Analytics,<br/>Risk Management)"]
-    
+    DS["Data Sources<br/>(APIs, Databases, Files)"] --> B["Bronze Layer<br/>(Data Lake)"]
+    B --Clean<br>Validate--> S["Silver Layer<br/>(Normalized)"]
+    S --Denormalize<br>Model<br>Materialize--> G["Gold Layer<br/>(Star Schema)"]
+    S --Display missing data/gaps<br>--> U["GUI"]
+    U --User-provided data changes--> S
+    G --> A["Analytics/BI<br/>(Reports, Dashboards)"]
     style B fill:#D4A574,stroke:#333,stroke-width:2px,color:#000
     style S fill:#C0C0C0,stroke:#333,stroke-width:2px,color:#000
     style G fill:#FFD700,stroke:#333,stroke-width:2px,color:#000
 ```
 
+
 ## Documentation
 
-- [Bronze Layer](layers/bronze.md) - Raw data landing zone, staging area
-- [Silver Layer](layers/silver.md) - Cleaned and normalized, 
-- [Gold Layer](layers/gold.md) - Source of truth for any reporting
-- [Bronze → Silver Transition](transitions/bronze-to-silver.md) - Data quality and cleaning
-- [Silver → Gold Transition](transitions/silver-to-gold.md) - Aggregation and business logic
-- [Best Practices](best-practices.md) - Governance and optimization
-- [Technology Stack](technology-stack.md) - Tools and platforms
+- [Bronze Layer](layers/bronze.md)
+  - Save external data raw with minimal transformation
+  - Generally insert-only, no modifying the data, allow processing data multiple times
+  - Save metadata about where data came from, when it arrived, what inputs were used for obtaining it, etc.
+  - Perform validations to ensure data is self-consistent
+- [Bronze -> Silver Transition](transitions/bronze-to-silver.md)
+  - Deduplication and cleanup
+  - Assign unique identifiers
+  - Map or create new internal identifiers
+  - Transformation logic (preferably in-memory) into normalized tables
+- [Silver Layer](layers/silver.md)
+  - Normalized tables (in Snowflake, use hybrid tables)
+  - Ensure uniqueness and referential integrity at all times
+  - Address any business-level check issues here
+- [Silver -> Gold Transition](transitions/silver-to-gold.md)
+  - Denormalize into data models useful to the business
+  - Transform data and materialize them into tables
+  - Perform groupings, aggregations, pre-compute things, etc.
+- [Gold Layer](layers/gold.md)
+  - Source of truth - never allow incorrect data to exist here
+  - Few tables with large number of columns
