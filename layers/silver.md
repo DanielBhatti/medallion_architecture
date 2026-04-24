@@ -18,6 +18,19 @@ We should strive for Boyce-Codd (3.5) normal form at minimum.
 
 ## Implementation Details
 
+### Naming Conventions
+- Use snake_case when naming
+- Always include the unit in a column name unless context makes it unambiguously clear
+  - interest_change_bps
+  - hurdle_percentage
+  - interest_amount_usd
+- Prefer schema names that indicate the source of the data
+  - intex
+  - hedgeserv
+  - arcesium
+- Prefer singular table names
+  - parcesiu.bundle (as opposed to parcesium.bundles)
+
 ### Idempotency
 
 Transformations from Bronze to Silver should be idempotent.  If Bronze data is unchanged, running the same piece of ETL multiple times should create the same data in the Silver layer.

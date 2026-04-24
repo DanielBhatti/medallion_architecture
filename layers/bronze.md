@@ -14,11 +14,11 @@ The Bronze layer stores raw, unprocessed data exactly as it arrives from source 
 
 ### Schemas
 - Create a schema representing where the source data comes from.  Prepend with stage_ or bronze_ (e.g. stage_hedgeserv).
-- When mapping data, transform field/column names to snake_case.
+- When mapping data, if feasible, rename field/column names to snake_case.
   - InvestorInternalId -> investor_internal_id
   - fundName -> fund_name
   - lmifee -> lmi_fee  
-- Create columns with the expected data type
+- If feasible, create columns with the expected data type (i.e. don't make everything string type)
 
 ### Ingest Data with Minimal Processing
 

@@ -25,4 +25,5 @@ Apply validation, cleaning, standardization, and deduplication to make data trus
 ### Enrichment
 - Add autoincrementing unique identifiers
 - Add lookups for related tables
-- Derive simple flags (e.g. is_master_fund)
+- Derive simple flags if they're useful (e.g. is_master_fund)
+- UIs should be available to allow business users to make modifications as necessary (e.g. mapping external investor ids to internal investor ids)
